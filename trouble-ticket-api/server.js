@@ -1,30 +1,29 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
-const app = express();
 const troubleTicketRoutes = require("./routes/troubleTicketRoutes");
-app.use(express.json());
 
-const PORT = process.env.PORT;
+const app = express();
+app.use(express.json());
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/tmf-api/troubleTicket/v5/troubleTicket", troubleTicketRoutes);
+
 const MONGO_URI = process.env.MONGO_URI;
 
-if (!MONGO_URI) {
-  console.log("Database URI not in .env file");
-  process.exit(1);
-}
-
 mongoose
-  .connect(MONGO_URI)
-  .then(() => {
-    console.log("Database is connected");
+  .connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
-  .catch((err) => {
-    console.log("Database connection error.");
-    process.exit(1);
-  });
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB error:", err));
 
-app.use("/api/tickets", troubleTicketRoutes);
-
+const PORT = 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port: ${PORT}`);
+  console.log(
+    `Server running at http://localhost:${PORT}/tmf-api/troubleTicket/v5/troubleTicket`
+  );
 });
